@@ -1,0 +1,188 @@
+// Shoot Them Up Game,All Right Reserved.
+
+
+#include "Player/STUBaseCharacter.h"
+#include "Camera/CameraComponent.h"
+#include "Components/InputComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Components/STUCharacterMovementComponent.h"
+#include "EnhancedInputSubsystems.h"
+
+// Sets default values
+ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjInit) 
+    : Super(ObjInit.SetDefaultSubobjectClass<USTUCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+{
+ 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+    SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponet"));
+    SpringArmComponent->SetupAttachment(GetRootComponent());
+    SpringArmComponent->bUsePawnControlRotation = true;
+    SpringArmComponent->TargetArmLength = 300.0f;
+    SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, 80.0f);
+
+    CameraComponet = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponet"));
+	CameraComponet->SetupAttachment(SpringArmComponent);
+    // 设置输入组件类型为EnhancedInputComponent
+    InputComponentClass = UEnhancedInputComponent::StaticClass();
+    // 自动加载输入资产（可选）
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_MoveRef(TEXT("/Game/Player/Input/IA_Move"));
+    MoveAction = IA_MoveRef.Object;
+    static ConstructorHelpers::FObjectFinder<UInputAction> IA_LookRef(TEXT("/Game/Player/Input/IA_Look"));
+    LookAction = IA_LookRef.Object;
+
+}
+
+// Called when the game starts or when spawned
+void ASTUBaseCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+    APlayerController* PlayerController = Cast<APlayerController>(GetController());
+    //与上面的同样，但不同写法。
+    //APlayerController* PlayerController = GetController<APlayerController>();
+    if (PlayerController)
+    {
+        // 注册输入映射
+        UEnhancedInputLocalPlayerSubsystem* Subsystem =
+            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+            Subsystem->AddMappingContext(DefaultMapping, 1);  // 优先级0[1,8](@ref)
+        
+    }
+	
+}
+
+// Called every frame
+void ASTUBaseCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+// Called to bind functionality to input
+void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    if (InputType == EInputType::RawInput)
+    {
+        if (PlayerInputComponent)
+        {
+            PlayerInputComponent->BindAxis("MoveForward", this, &ASTUBaseCharacter::MoveForward);
+            PlayerInputComponent->BindAxis("MoveRight", this, &ASTUBaseCharacter::MoveRight);
+            PlayerInputComponent->BindAxis("LookUp", this, &ASTUBaseCharacter::AddControllerPitchInput);
+            PlayerInputComponent->BindAxis("TurnAround", this, &ASTUBaseCharacter::AddControllerYawInput);
+            PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ASTUBaseCharacter::Jump);
+            PlayerInputComponent->BindAction("Run", IE_Pressed, this, &ASTUBaseCharacter::OnStartRunning);
+            PlayerInputComponent->BindAction("Run", IE_Released, this, &ASTUBaseCharacter::OnStopRunning);                 
+        }
+    }
+    else if (InputType == EInputType::EnhancedInput)
+    {
+        // 将输入组件转换为EnhancedInputComponent
+        UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+        if (EnhancedInput)
+        {
+            // 绑定MoveAction到回调函数
+            EnhancedInput->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ASTUBaseCharacter::Move);
+            EnhancedInput->BindAction(LookAction, ETriggerEvent::Triggered, this, &ASTUBaseCharacter::Look);
+            EnhancedInput->BindAction(JumpAction, ETriggerEvent::Started, this, &ASTUBaseCharacter::Jumping);
+            EnhancedInput->BindAction(RunAction, ETriggerEvent::Started, this, &ASTUBaseCharacter::OnStartRunning);
+            EnhancedInput->BindAction(RunAction, ETriggerEvent::Completed, this, &ASTUBaseCharacter::OnStopRunning);
+        }
+    }
+}
+
+
+void ASTUBaseCharacter::MoveForward(float Amount) 
+{
+    IsMovingForward = Amount > 0.0f;
+    if (Amount == 0.0f) return;
+	AddMovementInput(GetActorForwardVector(), Amount);
+    UE_LOG(LogTemp, Log, TEXT("MoveForward %f"), Amount);
+
+}
+
+void ASTUBaseCharacter::MoveRight(float Amount) 
+{
+    if (Amount == 0.0f) return;
+	AddMovementInput(GetActorRightVector(), Amount);
+    UE_LOG(LogTemp, Log, TEXT("MoveRight %f"), Amount);
+}
+
+void ASTUBaseCharacter::Move(const FInputActionValue& Value)
+{
+    MovementVector = Value.Get<FVector2D>();
+
+    // 将输入方向转换为角色移动方向（考虑摄像机旋转）
+    APlayerController* PlayerController = Cast<APlayerController>(GetController());
+    if (PlayerController)
+    {
+        const FRotator YawRotation(0, PlayerController->GetControlRotation().Yaw, 0);
+        const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+        const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+        //// 直接通过移动组件施加输入
+        // if (MovementComponent)
+        //{
+        //	MovementComponent->AddInputVector(ForwardDirection * MovementVector.Y); // W/S 控制前后
+        //	MovementComponent->AddInputVector(RightDirection * MovementVector.X);
+        // }
+        IsMovingForward = MovementVector.X> 0.0f;
+        AddMovementInput(ForwardDirection, MovementVector.X);  // 前后移动
+        AddMovementInput(RightDirection, MovementVector.Y);    // 左右移动[5,8](@ref)
+
+        UE_LOG(LogTemp, Log, TEXT("MoveForward %f"), MovementVector.X);
+        UE_LOG(LogTemp, Log, TEXT("MoveRight %f"), MovementVector.Y);
+    }
+}
+
+void ASTUBaseCharacter::Look(const FInputActionValue& Value) 
+{
+    LookVector = Value.Get<FVector2D>();
+    APlayerController* PlayerController = Cast<APlayerController>(GetController());
+    if (PlayerController)
+    {
+        AddControllerPitchInput(LookVector.Y);
+        AddControllerYawInput(LookVector.X);
+    }
+}
+
+void ASTUBaseCharacter::Jumping(const FInputActionValue& Value) 
+{
+    if (GetCharacterMovement()->IsMovingOnGround())
+    {
+        ACharacter::Jump();
+    }
+}
+
+void ASTUBaseCharacter::OnStartRunning() 
+{
+    UE_LOG(LogTemp, Log, TEXT("OnStartRunning"));
+    WantsToRun = true;
+}
+
+void ASTUBaseCharacter::OnStopRunning() 
+{
+    WantsToRun = false;
+}
+
+void ASTUBaseCharacter::Run(const FInputActionValue& Value) 
+{
+    WantsToRun = Value.Get<bool>();
+}
+
+bool ASTUBaseCharacter::IsRunning() const
+{
+    return WantsToRun&&IsMovingForward&&!GetVelocity().IsZero();
+}
+
+float ASTUBaseCharacter::GetMovementDirection() const
+{
+    if (GetVelocity().IsZero()) return 0.0f;
+    const auto VelocityNormal = GetVelocity().GetSafeNormal();
+    const auto AngleBetween = FMath::Acos(FVector::DotProduct(GetActorForwardVector(), VelocityNormal));
+    const auto CrossProduct= FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
+    const auto Degrees = FMath::RadiansToDegrees(AngleBetween);
+    return CrossProduct.IsZero()? Degrees : Degrees*FMath::Sign(CrossProduct.Z);
+}
+
+
+
