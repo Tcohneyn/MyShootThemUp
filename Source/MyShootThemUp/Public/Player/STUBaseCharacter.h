@@ -11,6 +11,9 @@ class UCameraComponent;
 class UInputAction;
 class UInputMappingContext;
 class USpringArmComponent;
+class USTUHealthComponent;
+class UTextRenderComponent;
+class UAnimMontage;
 
 UENUM(BlueprintType)
 enum class EInputType:uint8
@@ -29,11 +32,17 @@ public:
 	ASTUBaseCharacter(const FObjectInitializer& ObjInit);
 
 protected:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Componets")
-    TObjectPtr<UCameraComponent> CameraComponet;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
+    TObjectPtr<UCameraComponent> CameraComponent;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Componets")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
     TObjectPtr<USpringArmComponent> SpringArmComponent;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
+    TObjectPtr<USTUHealthComponent> HealthComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
+	TObjectPtr<UTextRenderComponent> HealthTextComponent;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input")
     EInputType InputType = EInputType::EnhancedInput;
@@ -53,6 +62,15 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
     TObjectPtr<UInputAction> RunAction;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TObjectPtr<UAnimMontage> DeathAnimMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FVector2D LandDamageVelocity=FVector2D(900.f,1200.f);	
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	FVector2D LandDamage=FVector2D(10.f,100.f);
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+    float LifeSpanOnDeath = 5.0f;
 	UPROPERTY()
 	TSubclassOf<UInputComponent> InputComponentClass;
 	// Called when the game starts or when spawned
@@ -89,5 +107,10 @@ private:
 	void OnStartRunning();
 	void OnStopRunning();
 	void Run(const FInputActionValue& Value);
+
+	void OnDeath();
+	void OnHealthChanged(float Health);
+	UFUNCTION()
+    void OnGroundLand(const FHitResult& Hit);
 
 };

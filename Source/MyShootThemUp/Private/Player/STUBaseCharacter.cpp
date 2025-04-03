@@ -5,8 +5,14 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/Controller.h"
 #include "Components/STUCharacterMovementComponent.h"
+#include "Components/STUHealthComponent.h"
+#include "Components/TextRenderComponent.h"
+#include "Engine/DamageEvents.h"
 #include "EnhancedInputSubsystems.h"
+
+DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
 // Sets default values
 ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjInit) 
@@ -20,8 +26,14 @@ ASTUBaseCharacter::ASTUBaseCharacter(const FObjectInitializer& ObjInit)
     SpringArmComponent->TargetArmLength = 300.0f;
     SpringArmComponent->SocketOffset = FVector(0.0f, 0.0f, 80.0f);
 
-    CameraComponet = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponet"));
-	CameraComponet->SetupAttachment(SpringArmComponent);
+    CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponet"));
+	CameraComponent->SetupAttachment(SpringArmComponent);
+
+    HealthComponent = CreateDefaultSubobject<USTUHealthComponent>(TEXT("HealthComponet"));
+
+    HealthTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("HealthTextComponet"));
+    HealthTextComponent->SetupAttachment(GetRootComponent());
+
     // 设置输入组件类型为EnhancedInputComponent
     InputComponentClass = UEnhancedInputComponent::StaticClass();
     // 自动加载输入资产（可选）
@@ -47,7 +59,15 @@ void ASTUBaseCharacter::BeginPlay()
             Subsystem->AddMappingContext(DefaultMapping, 1);  // 优先级0[1,8](@ref)
         
     }
-	
+
+    check(HealthComponent);
+    check(HealthTextComponent);
+    check(GetCharacterMovement());
+
+    OnHealthChanged(HealthComponent->GetHealth());
+	HealthComponent->OnDeath.AddUObject(this, &ASTUBaseCharacter::OnDeath);
+    HealthComponent->OnHealthChanged.AddUObject(this, &ASTUBaseCharacter::OnHealthChanged);
+    LandedDelegate.AddDynamic(this, &ASTUBaseCharacter::OnGroundLand);
 }
 
 // Called every frame
@@ -55,12 +75,16 @@ void ASTUBaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+    const auto Health=HealthComponent->GetHealth();
+
 }
+
 
 // Called to bind functionality to input
 void ASTUBaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    check(PlayerInputComponent);
     if (InputType == EInputType::RawInput)
     {
         if (PlayerInputComponent)
@@ -184,5 +208,36 @@ float ASTUBaseCharacter::GetMovementDirection() const
     return CrossProduct.IsZero()? Degrees : Degrees*FMath::Sign(CrossProduct.Z);
 }
 
+void ASTUBaseCharacter::OnDeath()
+{
+    UE_LOG(BaseCharacterLog, Display, TEXT("Player %s is dead"), *GetName());
 
+    PlayAnimMontage(DeathAnimMontage);
+
+    GetCharacterMovement()->DisableMovement();
+
+    SetLifeSpan(LifeSpanOnDeath);
+
+    if (Controller)
+    {
+        Controller->ChangeState(NAME_Spectating);
+    }
+}
+
+void ASTUBaseCharacter::OnHealthChanged(float Health) 
+{
+    HealthTextComponent->SetText(FText::FromString(FString::Printf(TEXT("%.0f"), Health)));
+}
+
+void ASTUBaseCharacter::OnGroundLand(const FHitResult& Hit)
+{
+/*    const auto FallVelocityZ = -GetCharacterMovement()->Velocity.Z; */   
+    const auto FallVelocityZ = -GetVelocity().Z;
+    UE_LOG(BaseCharacterLog, Display, TEXT("On landed:velocity %f"), FallVelocityZ);
+    if (FallVelocityZ < LandDamageVelocity.X) return;// 跳跃时速度小于一定值，不受伤
+    const auto FinalDamage = FMath::GetMappedRangeValueClamped(LandDamageVelocity,LandDamage,FallVelocityZ);
+    UE_LOG(BaseCharacterLog, Display, TEXT("FinalDamage %f"), FinalDamage);
+    TakeDamage(FinalDamage, FDamageEvent(), nullptr, nullptr);
+    
+}
 
