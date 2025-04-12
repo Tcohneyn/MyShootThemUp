@@ -26,6 +26,10 @@ public:
     void NextWeapon();
     void Reload();
 
+    bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
+    bool GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const;
+
+
 protected:
     // Called when the game starts
     virtual void BeginPlay() override;
