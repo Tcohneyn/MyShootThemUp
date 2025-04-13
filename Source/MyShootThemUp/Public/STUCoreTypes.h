@@ -3,7 +3,7 @@
 
 class ASTUBaseWeapon;
 
-DECLARE_MULTICAST_DELEGATE(FOnClipEmptySignature);//BaseWeapon
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnClipEmptySignature,ASTUBaseWeapon*);//);//BaseWeapon
 
 USTRUCT(BlueprintType)//BaseWeapon
 struct FAmmoData
@@ -12,11 +12,11 @@ struct FAmmoData
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     int32 Bullets;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "!Infintie"))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (EditCondition = "!Infinite"))
     int32 Clips;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
-    bool Infintie;
+    bool Infinite;
 };
 
 USTRUCT(BlueprintType)//WeaponComponent

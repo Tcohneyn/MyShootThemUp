@@ -160,8 +160,8 @@ void ASTUBaseCharacter::Move(const FInputActionValue& Value)
         AddMovementInput(ForwardDirection, MovementVector.X);  // 前后移动
         AddMovementInput(RightDirection, MovementVector.Y);    // 左右移动[5,8](@ref)
 
-        UE_LOG(LogTemp, Log, TEXT("MoveForward %f"), MovementVector.X);
-        UE_LOG(LogTemp, Log, TEXT("MoveRight %f"), MovementVector.Y);
+        //UE_LOG(LogTemp, Log, TEXT("MoveForward %f"), MovementVector.X);
+        //UE_LOG(LogTemp, Log, TEXT("MoveRight %f"), MovementVector.Y);
     }
 }
 

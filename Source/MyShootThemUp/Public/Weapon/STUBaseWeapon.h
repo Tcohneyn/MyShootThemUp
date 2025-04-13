@@ -23,12 +23,15 @@ public:
     UFUNCTION()
     virtual void StartFire();
     virtual void StopFire();
+    bool IsFiring() const;
 
     void ChangeClip();
     bool CanReload() const;
 
     FWeaponUIData GetUIData() const { return UIData; }
     FAmmoData GetAmmoData() const { return CurrentAmmo; }
+
+    bool TryToAddAmmo(int32 ClipAmount);
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -46,6 +49,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
     FWeaponUIData UIData;
 
+    bool FireInProgress = false;
+
     virtual void BeginPlay() override;
     virtual void MakeShot();
     virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
@@ -56,6 +61,8 @@ protected:
     void DecreaseAmmo();
     bool IsAmmoEmpty() const;
     bool IsClipEmpty() const;
+    bool IsAmmoFull() const;
+
     void LogAmmo();
     private:
         FAmmoData CurrentAmmo;
