@@ -127,7 +127,7 @@ private:
 	void Run(const FInputActionValue& Value);
 
 	void OnDeath();
-	void OnHealthChanged(float Health);
+	void OnHealthChanged(float Health,float HealthDelta);
 	UFUNCTION()
     void OnGroundLand(const FHitResult& Hit);
 

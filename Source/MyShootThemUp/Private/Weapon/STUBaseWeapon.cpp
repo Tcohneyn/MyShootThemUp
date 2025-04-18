@@ -6,6 +6,8 @@
 #include "DrawDebugHelpers.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/Controller.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogBaseWeapon, All, All);
 
@@ -24,11 +26,11 @@ void ASTUBaseWeapon::BeginPlay()
     checkf(DefaultAmmo.Clips > 0, TEXT("Clips count couldn't be less or equal zero!"));
     CurrentAmmo = DefaultAmmo;
 }
-void ASTUBaseWeapon::StartFire() 
+void ASTUBaseWeapon::StartFire()
 {
     FireInProgress = true;
 }
-void ASTUBaseWeapon::StopFire() 
+void ASTUBaseWeapon::StopFire()
 {
     FireInProgress = false;
 }
@@ -75,17 +77,19 @@ void ASTUBaseWeapon::MakeHit(FHitResult& HitResult, const FVector& TraceStart, c
     if (!GetWorld()) return;
     FCollisionQueryParams CollisionParams;
     CollisionParams.AddIgnoredActor(GetOwner());
+    CollisionParams.bReturnPhysicalMaterial = true;
+
     GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
 }
 void ASTUBaseWeapon::DecreaseAmmo()
 {
-    if (CurrentAmmo.Clips == 0)
+    if (CurrentAmmo.Bullets == 0)
     {
         UE_LOG(LogBaseWeapon, Warning, TEXT("Clip is empty!"));
         return;
     }
     CurrentAmmo.Bullets--;
-    // LogAmmo();
+    LogAmmo();
     if (IsClipEmpty() && !IsAmmoEmpty())
     {
         StopFire();
@@ -103,12 +107,12 @@ bool ASTUBaseWeapon::IsClipEmpty() const
 
 void ASTUBaseWeapon::ChangeClip()
 {
-    //CurrentAmmo.Bullets = DefaultAmmo.Bullets;
+    // CurrentAmmo.Bullets = DefaultAmmo.Bullets;
     if (!CurrentAmmo.Infinite)
     {
         if (CurrentAmmo.Clips == 0)
         {
-            UE_LOG(LogBaseWeapon, Warning, TEXT("No more clips!"));
+            UE_LOG(LogBaseWeapon, Error, TEXT("No more clips!"));
             return;
         }
         CurrentAmmo.Clips--;
@@ -130,8 +134,8 @@ void ASTUBaseWeapon::LogAmmo()
 
 bool ASTUBaseWeapon::IsAmmoFull() const
 {
-    return CurrentAmmo.Clips == DefaultAmmo.Clips && //
-        CurrentAmmo.Bullets == DefaultAmmo.Bullets;
+    return CurrentAmmo.Clips == DefaultAmmo.Clips &&  //
+           CurrentAmmo.Bullets == DefaultAmmo.Bullets;
 }
 
 bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipAmount)
@@ -145,7 +149,7 @@ bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipAmount)
     }
     else if (CurrentAmmo.Clips < DefaultAmmo.Clips)
     {
-        const auto NextClipsAmount=CurrentAmmo.Clips + ClipAmount;
+        const auto NextClipsAmount = CurrentAmmo.Clips + ClipAmount;
         if (DefaultAmmo.Clips - NextClipsAmount >= 0)
         {
             CurrentAmmo.Clips = NextClipsAmount;
@@ -159,9 +163,19 @@ bool ASTUBaseWeapon::TryToAddAmmo(int32 ClipAmount)
         }
     }
     else
-    {  
+    {
         CurrentAmmo.Bullets = DefaultAmmo.Bullets;
         UE_LOG(LogBaseWeapon, Display, TEXT("Bullets were added"));
     }
     return true;
+}
+
+UNiagaraComponent* ASTUBaseWeapon::SpawnMuzzleFX()
+{
+    return UNiagaraFunctionLibrary::SpawnSystemAttached(MuzzleFX,  //
+        WeaponMesh,                                                //
+        MuzzleSocketName,                                          //
+        FVector::ZeroVector,                                       //
+        FRotator::ZeroRotator,                                     //
+        EAttachLocation::SnapToTarget, true);
 }

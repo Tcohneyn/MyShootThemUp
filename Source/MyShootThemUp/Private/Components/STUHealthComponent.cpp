@@ -3,19 +3,20 @@
 
 #include "Components/STUHealthComponent.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/Pawn.h"
+#include "GameFramework/Controller.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Camera/CameraShake.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHealthComponent, All, All);
 
 // Sets default values for this component's properties
 USTUHealthComponent::USTUHealthComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
+
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
 }
 
 
@@ -51,6 +52,7 @@ void USTUHealthComponent::OnTakeAnyDamage(
 	{
         GetWorld()->GetTimerManager().SetTimer(HealTimerHandle, this, &USTUHealthComponent::HealUpdate, HealUpdateTime, true, HealDelay);
 	}
+    PlayCameraShake();
 }
 
 void USTUHealthComponent::HealUpdate() 
@@ -64,8 +66,10 @@ void USTUHealthComponent::HealUpdate()
 
 void USTUHealthComponent::SetHealth(float NewHealth)
 {
-    Health = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
-    OnHealthChanged.Broadcast(Health);
+    const auto NextHealth = FMath::Clamp(NewHealth, 0.0f, MaxHealth);
+    const auto HealthDelta = NextHealth - Health;
+    Health = NextHealth;
+    OnHealthChanged.Broadcast(Health,HealthDelta);
 	UE_LOG(LogHealthComponent, Log, TEXT("Health Changed to %f"), Health);
 }
 bool USTUHealthComponent::TryToAddHealth(float HealthAmout)
@@ -81,4 +85,14 @@ bool USTUHealthComponent::IsHealthFull() const
     return FMath::IsNearlyEqual(Health, MaxHealth);
 }
 
+void USTUHealthComponent::PlayCameraShake()
+{
+    if (IsDead()) return;
+    const auto Player = Cast<APawn>(GetOwner());
+    if (!Player) return;
+
+    const auto Controller = Player->GetController<APlayerController>();
+    if (!Controller || !Controller->PlayerCameraManager) return;
+    Controller->PlayerCameraManager->StartCameraShake(CameraShake);
+}
 

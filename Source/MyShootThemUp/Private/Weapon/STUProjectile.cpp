@@ -5,6 +5,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
+#include "Weapon/Components/STUWeaponFXComponent.h"
 
 ASTUProjectile::ASTUProjectile()
 {
@@ -14,11 +15,14 @@ ASTUProjectile::ASTUProjectile()
     CollisionComponent->InitSphereRadius(5.0f);
     CollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     CollisionComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+    CollisionComponent->bReturnMaterialOnMove = true;
     SetRootComponent(CollisionComponent);
 
     MovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement"));
     MovementComponent->InitialSpeed = 2000.0f;
     MovementComponent->ProjectileGravityScale = 0.0f;
+
+    WeaponFXComponent = CreateDefaultSubobject<USTUWeaponFXComponent>(TEXT("WeaponFXComponent"));
 }
 
 void ASTUProjectile::BeginPlay()
@@ -26,6 +30,7 @@ void ASTUProjectile::BeginPlay()
     Super::BeginPlay();
     check(CollisionComponent);
     check(MovementComponent);
+    ensure(WeaponFXComponent);
     MovementComponent->Velocity = ShotDirection * MovementComponent->InitialSpeed;
     CollisionComponent->IgnoreActorWhenMoving(GetOwner(), true);
     CollisionComponent->OnComponentHit.AddDynamic(this, &ASTUProjectile::OnProjectileHit);
@@ -42,12 +47,13 @@ void ASTUProjectile::OnProjectileHit(
         DamageAmount,                                //
         GetActorLocation(),                          //
         DamageRadius,                                //
-        UDamageType::StaticClass(),                   //
-        {GetOwner()},                                          //
+        UDamageType::StaticClass(),                  //
+        {GetOwner()},                                //
         this,                                        //
         GetController(),                             //
         DoFullDamage);
-    DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
+    //DrawDebugSphere(GetWorld(), GetActorLocation(), DamageRadius, 24, FColor::Red, false, 5.0f);
+    WeaponFXComponent->PlayImpactFX(Hit);
     Destroy();
 }
 
