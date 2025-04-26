@@ -15,7 +15,9 @@ public class MyShootThemUp : ModuleRules
             "EnhancedInput",
             "Niagara",
             "PhysicsCore",
-            "RenderCore"
+            "RenderCore",
+            "GameplayTasks",
+            "NavigationSystem"
         });
 
         PrivateDependencyModuleNames.AddRange(new string[] { });
@@ -30,7 +32,12 @@ public class MyShootThemUp : ModuleRules
             "MyShootThemUp/Public/Animations",
             "MyShootThemUp/Public/Pickups",
             "MyShootThemUp/Public/Weapon/Components",
-            "MyShootThemUp/Public/VFX"
+            "MyShootThemUp/Public/VFX",
+            "MyShootThemUp/Public/AI",
+            "MyShootThemUp/Public/AI/Tasks",
+            "MyShootThemUp/Public/AI/Services",
+            "MyShootThemUp/Public/AI/EQS",
+            "MyShootThemUp/Public/AI/Decorators"
 
         });
 

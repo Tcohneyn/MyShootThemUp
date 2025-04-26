@@ -93,6 +93,7 @@ protected:
 
 
 	virtual void BeginPlay() override;
+	virtual void OnDeath();
 
 
 
@@ -126,7 +127,6 @@ private:
 	void OnStopRunning();
 	void Run(const FInputActionValue& Value);
 
-	void OnDeath();
 	void OnHealthChanged(float Health,float HealthDelta);
 	UFUNCTION()
     void OnGroundLand(const FHitResult& Hit);
