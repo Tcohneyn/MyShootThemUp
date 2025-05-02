@@ -7,37 +7,39 @@
 #include "STUCoreTypes.h"
 #include "STUPlayerHUDWidget.generated.h"
 
-//class USTUWeaponComponent;
-//class USTUHealthComponent;
+// class USTUWeaponComponent;
+// class USTUHealthComponent;
 
 UCLASS()
 class MYSHOOTTHEMUP_API USTUPlayerHUDWidget : public UUserWidget
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 public:
-    UFUNCTION(BlueprintCallable,Category="UI")
+    UFUNCTION(BlueprintCallable, Category = "UI")
     float GetHealthPercent() const;
 
     UFUNCTION(BlueprintCallable, Category = "UI")
     bool GetCurrentWeaponUIData(FWeaponUIData& UIData) const;
 
     UFUNCTION(BlueprintCallable, Category = "UI")
-     bool GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const;
+    bool GetCurrentWeaponAmmoData(FAmmoData& AmmoData) const;
 
-     UFUNCTION(BlueprintCallable, Category = "UI")
-     bool IsPlayerAlive() const;     
-     
-     UFUNCTION(BlueprintCallable, Category = "UI")
-     bool IsPlayerSpectating() const;
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    bool IsPlayerAlive() const;
 
-     UFUNCTION(BlueprintImplementableEvent, Category = "UI")
-     void OnTakeDamage();
+    UFUNCTION(BlueprintCallable, Category = "UI")
+    bool IsPlayerSpectating() const;
 
-     virtual bool Initialize() override;
-     private:
-     void OnHealthChanged(float Health,float HealthDelta);
+    UFUNCTION(BlueprintImplementableEvent, Category = "UI")
+    void OnTakeDamage();
 
-    //private:
-    //    TObjectPtr<USTUWeaponComponent> GetWeaponComponent() const;
-    //    TObjectPtr<USTUHealthComponent> GetHealthComponent() const;
+    virtual bool Initialize() override;
+
+private:
+    void OnHealthChanged(float Health, float HealthDelta);
+    void OnNewPawn(APawn* NewPawn);
+
+    // private:
+    //     TObjectPtr<USTUWeaponComponent> GetWeaponComponent() const;
+    //     TObjectPtr<USTUHealthComponent> GetHealthComponent() const;
 };

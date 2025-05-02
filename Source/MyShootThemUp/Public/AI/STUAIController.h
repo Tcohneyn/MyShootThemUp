@@ -7,23 +7,27 @@
 #include "STUAIController.generated.h"
 
 class USTUAIPerceptionComponent;
+class USTURespawnComponent;
 
 UCLASS()
 class MYSHOOTTHEMUP_API ASTUAIController : public AAIController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 public:
-	ASTUAIController();
+    ASTUAIController();
 
-protected:	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
-	TObjectPtr<USTUAIPerceptionComponent> STUAIPerceptionComponent;
+protected:
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    TObjectPtr<USTUAIPerceptionComponent> STUAIPerceptionComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+    TObjectPtr<USTURespawnComponent> RespawnComponent;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "AI")
     FName FocusOnKeyName = "EnemyActor";
-	virtual void OnPossess(APawn* InPawn) override;
-	virtual void Tick(float DeltaTime) override;
-	
-	private:
-		AActor* GetFocusOnActor() const;
+    virtual void OnPossess(APawn* InPawn) override;
+    virtual void Tick(float DeltaTime) override;
+
+private:
+    AActor* GetFocusOnActor() const;
 };

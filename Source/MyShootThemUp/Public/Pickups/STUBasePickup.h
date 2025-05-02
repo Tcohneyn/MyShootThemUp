@@ -7,6 +7,7 @@
 #include "STUBasePickup.generated.h"
 
 class USphereComponent;
+class ASTUBaseWeapon;
 
 UCLASS()
 class MYSHOOTTHEMUP_API ASTUBasePickup : public AActor
@@ -28,9 +29,11 @@ protected:
 
 	virtual void BeginPlay() override;
     virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+    
 
 public:	
 	virtual void Tick(float DeltaTime) override;
+    virtual TSubclassOf<ASTUBaseWeapon> GetWeaponType() const { return nullptr; }
     bool CouldBeTaken() const;
 
 private:
