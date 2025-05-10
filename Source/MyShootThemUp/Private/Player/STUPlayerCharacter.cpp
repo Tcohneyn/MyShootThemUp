@@ -70,6 +70,7 @@ void ASTUPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
     check(WeaponComponent);
     if (InputType == EInputType::RawInput)
     {
+        SetInputType(EInputType::RawInput);
         if (PlayerInputComponent)
         {
             // 绑定输入轴到相应的函数
@@ -88,6 +89,7 @@ void ASTUPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
     }
     else if (InputType == EInputType::EnhancedInput)
     {
+        SetInputType(EInputType::EnhancedInput);
         // 将输入组件转换为EnhancedInputComponent
         UEnhancedInputComponent* EnhancedInput = Cast<UEnhancedInputComponent>(PlayerInputComponent);
         if (EnhancedInput)
@@ -238,4 +240,9 @@ void ASTUPlayerCharacter::CheckCamereOverlap()
             MeshChildGeometry->SetOwnerNoSee(HideMesh);
         }
     }
+}
+
+void ASTUPlayerCharacter::SetInputType(EInputType NewInputType) 
+{
+    OnInputTypeChanged.Broadcast(NewInputType);
 }

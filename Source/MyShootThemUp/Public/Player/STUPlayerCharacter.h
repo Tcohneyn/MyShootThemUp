@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Player/STUBaseCharacter.h"
+#include "STUCoreTypes.h"
 #include "STUPlayerCharacter.generated.h"
 
 class UInputAction;
@@ -12,13 +13,6 @@ class UCameraComponent;
 class USpringArmComponent;
 class USphereComponent;
 
-UENUM(BlueprintType)
-enum class EInputType : uint8
-{
-    RawInput,
-    EnhancedInput
-};
-
 UCLASS()
 class MYSHOOTTHEMUP_API ASTUPlayerCharacter : public ASTUBaseCharacter
 {
@@ -26,12 +20,16 @@ class MYSHOOTTHEMUP_API ASTUPlayerCharacter : public ASTUBaseCharacter
 public:
     ASTUPlayerCharacter(const FObjectInitializer& ObjInit);
 
+    FOnEInputType OnInputTypeChanged;
+
+
+
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
     TObjectPtr<UCameraComponent> CameraComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
-    TObjectPtr<USpringArmComponent> SpringArmComponent;  
+    TObjectPtr<USpringArmComponent> SpringArmComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
     TObjectPtr<USphereComponent> CameraCollisionComponent;
@@ -62,6 +60,7 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
     TObjectPtr<UInputAction> ReloadAction;
+
 
     UPROPERTY()
     TSubclassOf<UInputComponent> InputComponentClass;
@@ -95,13 +94,14 @@ private:
     void OnStopRunning();
 
     UFUNCTION()
-    void OnCameraCollisionBeginOverlap(UPrimitiveComponent*
-        OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-        const FHitResult& SweepResult);
+    void OnCameraCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+        int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
     UFUNCTION()
-    void OnCameraCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+    void OnCameraCollisionEndOverlap(
+        UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
     void CheckCamereOverlap();
 
+    void SetInputType(EInputType NewInputType);
 };

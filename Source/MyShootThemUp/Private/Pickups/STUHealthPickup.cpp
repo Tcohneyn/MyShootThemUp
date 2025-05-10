@@ -11,5 +11,6 @@ bool ASTUHealthPickup::GivePickupTo(APawn* PlayerPawn)
 {
     const auto HealthComponent = STUUtils::GetSTUPlayerComponent<USTUHealthComponent>(PlayerPawn);
     UE_LOG(LogHealthPickup, Display, TEXT("Health was taken"));
+    if (!HealthComponent) return false;
     return HealthComponent->TryToAddHealth(HealthAmount);
 }

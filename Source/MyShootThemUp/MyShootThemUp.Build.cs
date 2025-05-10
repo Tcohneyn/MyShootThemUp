@@ -37,7 +37,8 @@ public class MyShootThemUp : ModuleRules
             "MyShootThemUp/Public/AI/Tasks",
             "MyShootThemUp/Public/AI/Services",
             "MyShootThemUp/Public/AI/EQS",
-            "MyShootThemUp/Public/AI/Decorators"
+            "MyShootThemUp/Public/Menu",
+            "MyShootThemUp/Public/Menu/UI"
 
         });
 

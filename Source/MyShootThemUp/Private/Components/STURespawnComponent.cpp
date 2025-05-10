@@ -23,14 +23,17 @@ void USTURespawnComponent::Respawn(int32 RespawnTime)
 
 void USTURespawnComponent::RespawnTimerUpdate() 
 {
-    if (!GetWorld()) return;
-    GetWorld()->GetTimerManager().ClearTimer(RespawnTimerHandle);
+    if (--RespawnCountDown == 0)
+    {
+        if (!GetWorld()) return;
+        GetWorld()->GetTimerManager().ClearTimer(RespawnTimerHandle);
 
-    const auto GameMode = Cast<ASTUGameModeBase>(GetWorld()->GetAuthGameMode());
+        const auto GameMode = Cast<ASTUGameModeBase>(GetWorld()->GetAuthGameMode());
 
-    if (!GameMode) return;
+        if (!GameMode) return;
 
-    GameMode->RespawnRequest(Cast<AController>(GetOwner()));
+        GameMode->RespawnRequest(Cast<AController>(GetOwner()));
+    }
 }
 
 bool USTURespawnComponent::IsRespawnInProgress() const
