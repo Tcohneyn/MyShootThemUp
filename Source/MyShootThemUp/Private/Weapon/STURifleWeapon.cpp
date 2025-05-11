@@ -8,6 +8,9 @@
 #include "Weapon/Components/STUWeaponFXComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
 ASTURifleWeapon::ASTURifleWeapon() 
 {
@@ -25,7 +28,7 @@ void ASTURifleWeapon::StartFire()
     //Super::StartFire();
     // UE_LOG(LogBaseWeapon,Display, TEXT("Fire"));
     // 初始化枪口FX
-    InitMuzzleFX();
+    InitFX();
     // 设置定时器，每隔一段时间发射一次子弹
     GetWorld()->GetTimerManager().SetTimer(ShotTimerHandle, this, &ASTURifleWeapon::MakeShot, TimeBetweenShots, true);
     // 发射一次子弹
@@ -36,7 +39,7 @@ void ASTURifleWeapon::StopFire()
     // 清除定时器
     GetWorldTimerManager().ClearTimer(ShotTimerHandle);
     // 设置枪口FX不可见
-    SetMuzzleFXVisibility(false);
+    SetFXActive(false);
 }
 
 
@@ -106,24 +109,32 @@ void ASTURifleWeapon::MakeDamage(const FHitResult& HitResult)
     DamageActor->TakeDamage(DamageAmount, FDamageEvent(), GetController(), this);
 }
 
-void ASTURifleWeapon::InitMuzzleFX() 
+void ASTURifleWeapon::InitFX() 
 {
     // 如果枪口FX组件不存在，生成一个
     if (!MuzzleFXComponent)
     {
         MuzzleFXComponent = SpawnMuzzleFX();
     }
+    if (!FireAudioComponent)
+    {
+        FireAudioComponent = UGameplayStatics::SpawnSoundAttached(FireSound, WeaponMesh, MuzzleSocketName);
+    }
     // 设置枪口FX可见
-    SetMuzzleFXVisibility(true);
+    SetFXActive(true);
 }
 
-void ASTURifleWeapon::SetMuzzleFXVisibility(bool Visible) 
+void ASTURifleWeapon::SetFXActive(bool IsActive) 
 {
     // 设置枪口FX的可见性
     if (MuzzleFXComponent)
     {
-        MuzzleFXComponent->SetPaused(!Visible);
-        MuzzleFXComponent->SetVisibility(Visible, true);
+        MuzzleFXComponent->SetPaused(!IsActive);
+        MuzzleFXComponent->SetVisibility(IsActive, true);
+    }
+    if (FireAudioComponent)
+    {
+        IsActive ? FireAudioComponent->Play() : FireAudioComponent->Stop();
     }
 }
 

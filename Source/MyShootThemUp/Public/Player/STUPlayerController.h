@@ -23,7 +23,10 @@ protected:
     TObjectPtr<USTURespawnComponent> RespawnComponent;
 
     UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
-    TObjectPtr<UInputAction> PauseGameAction;
+    TObjectPtr<UInputAction> PauseGameAction;    
+    
+    UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
+    TObjectPtr<UInputAction> MuteAction;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input")
     EInputType InputType = EInputType::EnhancedInput;
@@ -44,5 +47,6 @@ protected:
 private:
     void OnPauseGame();
     void OnMatchStateChanged(ESTUMatchState State);
+    void OnMuteSound();
     // EInputType SetInputType(EInputType InputType);
 };

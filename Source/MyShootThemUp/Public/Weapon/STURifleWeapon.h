@@ -9,6 +9,7 @@
 class USTUWeaponFXComponent;
 class UNiagaraComponent;
 class UNiagaraSystem;
+class UAudioComponent;
 
 UCLASS()
 class MYSHOOTTHEMUP_API ASTURifleWeapon : public ASTUBaseWeapon
@@ -43,16 +44,18 @@ protected:
     virtual void MakeShot() override;
     virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const override;
 
-
 private:
     FTimerHandle ShotTimerHandle;
 
     UPROPERTY()
     TObjectPtr<UNiagaraComponent> MuzzleFXComponent;
 
+    UPROPERTY()
+    TObjectPtr<UAudioComponent> FireAudioComponent;
+
     void MakeDamage(const FHitResult& HitResult);
-    void InitMuzzleFX();
-    void SetMuzzleFXVisibility(bool Visible);
+    void InitFX();
+    void SetFXActive(bool IsActive);
     void SpawnTraceFX(const FVector& TraceStart, const FVector& TraceEnd);
 
     AController* GetController() const;

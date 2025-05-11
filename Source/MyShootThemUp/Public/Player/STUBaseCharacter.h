@@ -7,13 +7,11 @@
 #include "EnhancedInputComponent.h"
 #include "STUBaseCharacter.generated.h"
 
-
 class USTUHealthComponent;
 class UTextRenderComponent;
 class UAnimMontage;
 class USTUWeaponComponent;
-
-
+class USoundCue;
 
 UCLASS()
 class MYSHOOTTHEMUP_API ASTUBaseCharacter : public ACharacter
@@ -28,14 +26,12 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
     TObjectPtr<USTUHealthComponent> HealthComponent;
 
-    //UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
-    //TObjectPtr<UTextRenderComponent> HealthTextComponent;
+    // UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
+    // TObjectPtr<UTextRenderComponent> HealthTextComponent;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
     TObjectPtr<USTUWeaponComponent> WeaponComponent;
     // USTUWeaponComponent* WeaponComponent;
-
-
 
     UPROPERTY(EditDefaultsOnly, Category = "Animation")
     TObjectPtr<UAnimMontage> DeathAnimMontage;
@@ -52,7 +48,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "Damage")
     FName MaterialColorName = "Paint Color";
 
-
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundCue* DeathSound;
 
     virtual void BeginPlay() override;
     virtual void OnDeath();

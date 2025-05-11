@@ -46,6 +46,7 @@ DECLARE_MULTICAST_DELEGATE(FOnDeath);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHealthChanged, float, float);
 
 class UNiagaraSystem;
+class USoundCue;
 
 USTRUCT(BlueprintType)  // VFX
 struct FDecalData
@@ -74,6 +75,9 @@ struct FImpactData
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     FDecalData DecalData;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
+    USoundCue* Sound;
 };
 
 USTRUCT(BlueprintType)

@@ -7,11 +7,10 @@
 #include "STUCoreTypes.h"
 #include "STUBaseWeapon.generated.h"
 
-
 class USkeletalMeshComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
-
+class USoundCue;
 
 UCLASS()
 class MYSHOOTTHEMUP_API ASTUBaseWeapon : public AActor
@@ -57,22 +56,25 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     TObjectPtr<UNiagaraSystem> MuzzleFX;
 
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundCue* FireSound;
+
     bool FireInProgress = false;
 
     virtual void BeginPlay() override;
     virtual void MakeShot();
     virtual bool GetTraceData(FVector& TraceStart, FVector& TraceEnd) const;
-    //APlayerController* GetPlayerController() const;
+    // APlayerController* GetPlayerController() const;
     bool GetPlayerViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
     FVector GetMuzzleLocation() const;
     void MakeHit(FHitResult& HitResult, const FVector& TraceStart, const FVector& TraceEnd);
     void DecreaseAmmo();
     bool IsClipEmpty() const;
 
-
     void LogAmmo();
 
     UNiagaraComponent* SpawnMuzzleFX();
-    private:
-        FAmmoData CurrentAmmo;
+
+private:
+    FAmmoData CurrentAmmo;
 };

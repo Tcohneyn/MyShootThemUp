@@ -1,25 +1,30 @@
 // Shoot Them Up Game,All Right Reserved.
 
-
 #include "Weapon/STULauncherWeapon.h"
 #include "WEAPON/STUProjectile.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundCue.h"
 
-void ASTULauncherWeapon::StartFire() 
+void ASTULauncherWeapon::StartFire()
 {
-	MakeShot();
+    MakeShot();
 }
 
-void ASTULauncherWeapon::MakeShot() 
+void ASTULauncherWeapon::MakeShot()
 {
-    if (!GetWorld()||IsAmmoEmpty()) return;
+    if (!GetWorld()) return;
+    if (IsAmmoEmpty())
+    {
+        UGameplayStatics::SpawnSoundAtLocation(GetWorld(), NoAmmoSound, GetActorLocation());
+        return;
+    }
     FVector TraceStart, TraceEnd;
     if (!GetTraceData(TraceStart, TraceEnd)) return;
     FHitResult HitResult;
     MakeHit(HitResult, TraceStart, TraceEnd);
-    const FVector EndPoint=HitResult.bBlockingHit? HitResult.ImpactPoint : TraceEnd;
+    const FVector EndPoint = HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd;
     const FVector Direction = (EndPoint - GetMuzzleLocation()).GetSafeNormal();
-    const FTransform SpawnTransform (FRotator::ZeroRotator,GetMuzzleLocation());
+    const FTransform SpawnTransform(FRotator::ZeroRotator, GetMuzzleLocation());
     ASTUProjectile* Projectile = GetWorld()->SpawnActorDeferred<ASTUProjectile>(ProjectileClass, SpawnTransform);
     if (Projectile)
     {
@@ -29,4 +34,5 @@ void ASTULauncherWeapon::MakeShot()
     }
     DecreaseAmmo();
     SpawnMuzzleFX();
+    UGameplayStatics::SpawnSoundAttached(FireSound, WeaponMesh, MuzzleSocketName);
 }

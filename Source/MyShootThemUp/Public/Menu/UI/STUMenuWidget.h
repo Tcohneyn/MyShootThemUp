@@ -11,11 +11,12 @@ class UButton;
 class UHorizontalBox;
 class USTUGameInstance;
 class USTULevelItemWidget;
+class USoundCue;
 
 UCLASS()
 class MYSHOOTTHEMUP_API USTUMenuWidget : public USTUBaseWidget
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 protected:
     UPROPERTY(meta = (BindWidget))
     UButton* StartGameButton;
@@ -23,15 +24,17 @@ protected:
     UPROPERTY(meta = (BindWidget))
     UButton* QuitGameButton;
 
-        UPROPERTY(meta = (BindWidget))
+    UPROPERTY(meta = (BindWidget))
     UHorizontalBox* LevelItemsBox;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UUserWidget> LevelItemWidgetClass;
 
-
     UPROPERTY(meta = (BindWidgetAnim), Transient)
     UWidgetAnimation* HideAnimation;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+    USoundCue* StartGameSound;
 
     virtual void NativeOnInitialized() override;
 
@@ -42,7 +45,7 @@ private:
     TArray<USTULevelItemWidget*> LevelItemWidgets;
 
     UFUNCTION()
-    void OnStartGame();    
+    void OnStartGame();
 
     UFUNCTION()
     void OnQuitGame();

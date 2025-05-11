@@ -8,6 +8,7 @@
 
 class USphereComponent;
 class ASTUBaseWeapon;
+class USoundCue;
 
 UCLASS()
 class MYSHOOTTHEMUP_API ASTUBasePickup : public AActor
@@ -21,9 +22,11 @@ protected:
     UPROPERTY(VisibleAnywhere,Category = "Pickup")
 	TObjectPtr<USphereComponent> CollisionComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Pickup")
+	UPROPERTY(EditAnywhere, Category = "Pickup")
     float RespawnTime = 5.0f;
 
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Pickup")
+    USoundCue* PickupTakenSound;
 	//UPROPERTY(VisibleAnywhere, Category = "Pickup")
  //   bool CouldBeTakenTest = true;
 

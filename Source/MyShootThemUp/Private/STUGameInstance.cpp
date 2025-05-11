@@ -2,4 +2,9 @@
 
 
 #include "STUGameInstance.h"
+#include "Sound/STUSoundFunctionLib.h"
 
+void USTUGameInstance::ToggleVolume() 
+{
+    USTUSoundFunctionLib::ToggleSoundClassVolume(MasterSoundClass);
+}
