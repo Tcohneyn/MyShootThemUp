@@ -8,57 +8,74 @@
 #include "STUHealthComponent.generated.h"
 
 class UCameraShakeBase;
+class UPhysicalMaterial;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class MYSHOOTTHEMUP_API USTUHealthComponent : public UActorComponent
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
-	USTUHealthComponent();
+public:
+    // Sets default values for this component's properties
+    USTUHealthComponent();
 
-	float GetHealth() const  {return Health;}
-	
-	UFUNCTION(BlueprintCallable)
-	bool IsDead() const {return FMath::IsNearlyZero(Health);}
+    float GetHealth() const { return Health; }
 
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	float GetHealthPercent() const {return Health/MaxHealth;}
+    UFUNCTION(BlueprintCallable)
+    bool IsDead() const { return FMath::IsNearlyZero(Health); }
 
-	FOnDeath OnDeath;
-	FOnHealthChanged OnHealthChanged;
+    UFUNCTION(BlueprintCallable, Category = "Health")
+    float GetHealthPercent() const { return Health / MaxHealth; }
 
-	bool TryToAddHealth(float HealthAmout);
+    FOnDeath OnDeath;
+    FOnHealthChanged OnHealthChanged;
+
+    bool TryToAddHealth(float HealthAmout);
     bool IsHealthFull() const;
 
 protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health", meta = (ClampMin = "0.0", ClampMax = "1000.0"))
     float MaxHealth = 100.0f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
-	bool AutoHeal = true;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal")
+    bool AutoHeal = true;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
     float HealUpdateTime = 1.0f;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
-	float HealDelay = 3.0f;
+    float HealDelay = 3.0f;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Heal", meta = (EditCondition = "AutoHeal"))
-	float HealModifier = 5.0f;
+    float HealModifier = 5.0f;
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "VFX")
     TSubclassOf<UCameraShakeBase> CameraShake;
 
-	// Called when the game starts
-	virtual void BeginPlay() override;
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Health")
+    TMap<UPhysicalMaterial*, float> DamageModifiers;
+
+    // Called when the game starts
+    virtual void BeginPlay() override;
 
 private:
-	float Health=0.0f;
-	FTimerHandle HealTimerHandle;
+    float Health = 0.0f;
+    FTimerHandle HealTimerHandle;
     UFUNCTION()
     void OnTakeAnyDamage(
         AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
-	void HealUpdate();
-	void SetHealth(float NewHealth);
-	void PlayCameraShake();
+    UFUNCTION()
+    void OnTakePointDamage(AActor* DamagedActor, float Damage, class AController* InstigatedBy, FVector HitLocation,
+        class UPrimitiveComponent* FHitComponent, FName BoneName, FVector ShotFromDirection, const class UDamageType* DamageType,
+        AActor* DamageCauser);
 
-	void Killed(AController* KillerController);
+    UFUNCTION()
+    void OnTakeRadialDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, FVector Origin,
+        const FHitResult& HitInfo, class AController* InstigatedBy, AActor* DamageCauser);
+
+    void HealUpdate();
+    void SetHealth(float NewHealth);
+    void PlayCameraShake();
+
+    void Killed(AController* KillerController);
+    void ApplyDamage(float Damage, AController* InstigatedBy);
+    float GetPointDamageModifier(AActor* DamagedActor, const FName& BoneName);
+
+    void ReportDamageEvent(float Damage, AController* InstigatedBy);
 };

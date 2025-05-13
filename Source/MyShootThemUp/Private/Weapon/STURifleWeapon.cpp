@@ -105,8 +105,10 @@ void ASTURifleWeapon::MakeDamage(const FHitResult& HitResult)
     // 获取击中目标的Actor
     const auto DamageActor = HitResult.GetActor();
     if (!DamageActor) return;
+    FPointDamageEvent PointDamageEvent;
+    PointDamageEvent.HitInfo = HitResult;
     // 对目标进行伤害计算
-    DamageActor->TakeDamage(DamageAmount, FDamageEvent(), GetController(), this);
+    DamageActor->TakeDamage(DamageAmount, PointDamageEvent, GetController(), this);
 }
 
 void ASTURifleWeapon::InitFX() 

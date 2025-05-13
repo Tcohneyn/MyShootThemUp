@@ -63,6 +63,7 @@ void ASTUBaseCharacter::Tick(float DeltaTime)
     const auto Health = HealthComponent->GetHealth();
 }
 
+
 // Called to bind functionality to input
 bool ASTUBaseCharacter::IsRunning() const
 {
@@ -138,4 +139,18 @@ void ASTUBaseCharacter::OnGroundLand(const FHitResult& Hit)
     UE_LOG(BaseCharacterLog, Display, TEXT("FinalDamage %f"), FinalDamage);
     // 伤害角色
     TakeDamage(FinalDamage, FDamageEvent(), nullptr, nullptr);
+}
+
+void ASTUBaseCharacter::TurnOff() 
+{
+    WeaponComponent->StopFire();
+    WeaponComponent->Zoom(false);
+    Super::TurnOff();
+}
+
+void ASTUBaseCharacter::Reset() 
+{
+    WeaponComponent->StopFire();
+    WeaponComponent->Zoom(false);
+    Super::Reset();
 }
