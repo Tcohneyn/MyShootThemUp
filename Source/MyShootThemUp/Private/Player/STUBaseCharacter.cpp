@@ -109,6 +109,7 @@ void ASTUBaseCharacter::OnDeath()
     GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
     // 停止角色的射击
     WeaponComponent->StopFire();
+    WeaponComponent->Zoom(false);
 
     // 设置角色的Mesh的碰撞模式和物理模拟
     GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);

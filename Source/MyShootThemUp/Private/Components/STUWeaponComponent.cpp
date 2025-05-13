@@ -75,6 +75,7 @@ void USTUWeaponComponent::EquipWeapon(int32 WeaponIndex)
     if (!Character) return;
     if (CurrentWeapon)
     {
+        CurrentWeapon->Zoom(false);
         CurrentWeapon->StopFire();
         AttachWeaponToSocket(CurrentWeapon, Character->GetMesh(), WeaponArmorySocketName);
     }
@@ -252,4 +253,12 @@ void USTUWeaponComponent::ChangeClip()
     CurrentWeapon->ChangeClip();
     ReloadAnimInProgress = true;
     PlayAnimMontage(CurrentReloadAnimMontage);
+}
+
+void USTUWeaponComponent::Zoom(bool Enabled)
+{
+    if (CurrentWeapon)
+    {
+        CurrentWeapon->Zoom(Enabled);
+    }
 }

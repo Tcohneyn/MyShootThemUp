@@ -68,6 +68,7 @@ void ASTUPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
     // 检查PlayerInputComponent和WeaponComponent是否为空
     check(PlayerInputComponent);
     check(WeaponComponent);
+    DECLARE_DELEGATE_OneParam(FZoomInputSignature, bool);
     if (InputType == EInputType::RawInput)
     {
         SetInputType(EInputType::RawInput);
@@ -85,6 +86,10 @@ void ASTUPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
             PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent.Get(), &USTUWeaponComponent::StopFire);
             PlayerInputComponent->BindAction("NextWeapon", IE_Pressed, WeaponComponent.Get(), &USTUWeaponComponent::NextWeapon);
             PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent.Get(), &USTUWeaponComponent::Reload);
+            PlayerInputComponent->BindAction<FZoomInputSignature>(
+                "Zoom", IE_Pressed, WeaponComponent.Get(), &USTUWeaponComponent::Zoom, true);
+            PlayerInputComponent->BindAction<FZoomInputSignature>(
+                "Zoom", IE_Released, WeaponComponent.Get(), &USTUWeaponComponent::Zoom, false);
         }
     }
     else if (InputType == EInputType::EnhancedInput)
@@ -104,6 +109,8 @@ void ASTUPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
             EnhancedInput->BindAction(FireAction, ETriggerEvent::Completed, WeaponComponent.Get(), &USTUWeaponComponent::StopFire);
             EnhancedInput->BindAction(WeaponAction, ETriggerEvent::Started, WeaponComponent.Get(), &USTUWeaponComponent::NextWeapon);
             EnhancedInput->BindAction(ReloadAction, ETriggerEvent::Started, WeaponComponent.Get(), &USTUWeaponComponent::Reload);
+            EnhancedInput->BindAction(ZoomAction, ETriggerEvent::Started, WeaponComponent.Get(), &USTUWeaponComponent::Zoom, true);
+            EnhancedInput->BindAction(ZoomAction, ETriggerEvent::Completed, WeaponComponent.Get(), &USTUWeaponComponent::Zoom, false);
         }
     }
 }
@@ -242,7 +249,7 @@ void ASTUPlayerCharacter::CheckCamereOverlap()
     }
 }
 
-void ASTUPlayerCharacter::SetInputType(EInputType NewInputType) 
+void ASTUPlayerCharacter::SetInputType(EInputType NewInputType)
 {
     OnInputTypeChanged.Broadcast(NewInputType);
 }

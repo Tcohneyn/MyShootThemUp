@@ -22,8 +22,6 @@ public:
 
     FOnEInputType OnInputTypeChanged;
 
-
-
 protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Componets")
     TObjectPtr<UCameraComponent> CameraComponent;
@@ -61,6 +59,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
     TObjectPtr<UInputAction> ReloadAction;
 
+    UPROPERTY(EditDefaultsOnly, Category = "EnhancedInput")
+    TObjectPtr<UInputAction> ZoomAction;
 
     UPROPERTY()
     TSubclassOf<UInputComponent> InputComponentClass;

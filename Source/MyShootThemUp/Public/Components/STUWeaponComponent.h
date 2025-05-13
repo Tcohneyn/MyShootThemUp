@@ -34,6 +34,7 @@ public:
 
     bool NeedAmmo(TSubclassOf<ASTUBaseWeapon> WeaponType);
 
+    void Zoom(bool Enabled);
 
 protected:
     // Called when the game starts
